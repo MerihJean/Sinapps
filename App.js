@@ -1,21 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react"
+import { Text, View } from "react-native"
+import { createServer } from "miragejs"
+import position from './out.js';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+if (window.server) {
+  server.shutdown()
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+window.server = createServer({
+  routes() {
+    this.get("/api/position", () => {
+      return {
+        position1: position
+      }
+    })
   },
-});
+})
+export default class App extends React.Component {
+  state = {
+    position: []
+  }
+  async componentDidMount(){
+    fetch("/api/position")
+    .then((res) => res.json())
+    .then((json) => this.setState({position: json.position1}))
+  }
+  render() {
+  return (
+    <View>
+      {this.state.position.map((position) => (
+        <Text key={position.gmlpos}>
+          {position.gmlpos}
+        </Text>
+      ))}
+    </View>
+  )
+  }
+}
